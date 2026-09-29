@@ -1,0 +1,2071 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>주일학교 담당자 관리</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  background: #f5f6f8;
+  color: #222;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Apple SD Gothic Neo",
+    "Noto Sans KR",
+    sans-serif;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.header {
+  background: #ffffff;
+  padding: 20px 16px 14px;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.tabs {
+  display: flex;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 68px;
+  z-index: 90;
+}
+
+.tab {
+  flex: 1;
+  padding: 13px 8px;
+  border: 0;
+  background: #ffffff;
+  color: #777;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.tab.active {
+  color: #111827;
+  border-bottom: 3px solid #111827;
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* 일정 */
+
+.week-card {
+  background: #ffffff;
+  border-radius: 16px;
+  margin-bottom: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.week-title {
+  padding: 15px 16px;
+  background: #f0f1f3;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.week-skipped {
+  padding: 22px 16px;
+  text-align: center;
+  color: #777;
+  font-weight: 700;
+}
+
+.assignment-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 16px;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.assignment-row:last-child {
+  border-bottom: 0;
+}
+
+.assignment-name {
+  color: #555;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.assignment-person {
+  font-size: 16px;
+  font-weight: 800;
+  text-align: right;
+}
+
+.copy-button {
+  width: 100%;
+  border: 0;
+  border-radius: 13px;
+  padding: 15px;
+  margin: 4px 0 18px;
+  background: #111827;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.copy-button:active {
+  transform: scale(0.98);
+}
+
+/* 관리 */
+
+.section {
+  background: #ffffff;
+  border-radius: 16px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.section-title {
+  padding: 15px 16px;
+  font-size: 17px;
+  font-weight: 800;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.category {
+  border-bottom: 1px solid #eeeeee;
+}
+
+.category:last-child {
+  border-bottom: 0;
+}
+
+.category-header {
+  padding: 14px 16px 10px;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.person-list {
+  padding: 0 12px 12px;
+}
+
+.person-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 4px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #ffffff;
+}
+
+.person-item:last-child {
+  border-bottom: 0;
+}
+
+.drag-handle {
+  width: 34px;
+  height: 36px;
+  border: 0;
+  background: #f1f2f4;
+  border-radius: 8px;
+  color: #777;
+  font-size: 19px;
+  flex-shrink: 0;
+  touch-action: none;
+}
+
+.person-number {
+  width: 25px;
+  text-align: center;
+  color: #999;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.person-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.person-action {
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 9px;
+  background: #f1f2f4;
+  color: #444;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.add-area {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  background: #fafafa;
+}
+
+.add-area input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid #ddd;
+  border-radius: 9px;
+  padding: 10px;
+  background: #fff;
+}
+
+.add-area button {
+  border: 0;
+  border-radius: 9px;
+  padding: 0 14px;
+  background: #111827;
+  color: #fff;
+  font-weight: 700;
+}
+
+.inactive-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 16px;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.inactive-item:last-child {
+  border-bottom: 0;
+}
+
+.inactive-name {
+  flex: 1;
+  font-weight: 700;
+}
+
+.small-button {
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #f1f2f4;
+}
+
+.delete-button {
+  background: #fff0f0;
+  color: #c62828;
+}
+
+.empty {
+  padding: 18px 16px;
+  color: #999;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* 담당연기 */
+
+.skip-area {
+  padding: 15px 16px;
+}
+
+.skip-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.skip-input-row input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid #ddd;
+  border-radius: 9px;
+  padding: 10px;
+}
+
+.skip-input-row button {
+  border: 0;
+  border-radius: 9px;
+  padding: 0 14px;
+  background: #111827;
+  color: #fff;
+  font-weight: 700;
+}
+
+.skip-help {
+  margin-top: 8px;
+  color: #888;
+  font-size: 12px;
+}
+
+.skipped-history {
+  margin-top: 14px;
+  border-top: 1px solid #eee;
+}
+
+.skipped-history-title {
+  padding: 12px 0 8px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.skipped-row {
+  display: flex;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.skipped-date {
+  flex: 1;
+  font-weight: 700;
+}
+
+.cancel-skip {
+  border: 0;
+  border-radius: 8px;
+  padding: 7px 10px;
+  background: #f1f2f4;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* 하단 */
+
+.danger-area {
+  padding: 16px;
+}
+
+.reset-button {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 12px;
+  background: #fff;
+  color: #555;
+  font-weight: 700;
+}
+
+/* 드래그 */
+
+.person-item.dragging {
+  opacity: 0.45;
+  background: #f5f6f8;
+}
+
+.person-item.drag-over {
+  border: 2px dashed #999;
+  border-radius: 10px;
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 12px;
+  }
+
+  .assignment-row {
+    padding: 12px 13px;
+  }
+
+  .assignment-name {
+    font-size: 13px;
+  }
+
+  .assignment-person {
+    font-size: 15px;
+  }
+
+  .person-action {
+    padding: 7px 8px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+  <h1>주일학교 담당자 관리</h1>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" id="scheduleTab">담당 일정</button>
+  <button class="tab" id="managerTab">관리</button>
+</nav>
+
+<main class="container">
+
+  <!-- 담당 일정 -->
+  <section id="schedulePage">
+
+    <button class="copy-button" id="copyFourWeeks">
+      카톡용 4주 일정 전체 복사
+    </button>
+
+    <div id="scheduleContainer"></div>
+
+  </section>
+
+
+  <!-- 관리 -->
+  <section id="managerPage" class="hidden">
+
+    <div class="section">
+      <div class="section-title">담당자 관리</div>
+      <div id="managerContainer"></div>
+    </div>
+
+
+    <div class="section">
+      <div class="section-title">담당연기</div>
+
+      <div class="skip-area">
+
+        <div class="skip-input-row">
+          <input
+            type="date"
+            id="skipDate"
+          >
+          <button id="addSkipButton">추가</button>
+        </div>
+
+        <div class="skip-help">
+          담당을 연기할 일요일을 선택해주세요.
+        </div>
+
+        <div
+          id="skippedHistory"
+          class="skipped-history"
+        ></div>
+
+      </div>
+    </div>
+
+
+    <div class="section">
+      <div class="section-title">비활성 담당자</div>
+      <div id="inactiveContainer"></div>
+    </div>
+
+
+    <div class="section">
+      <div class="danger-area">
+        <button
+          class="reset-button"
+          id="resetButton"
+        >
+          전체 담당자 설정 초기화
+        </button>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+
+<script>
+/* =========================================================
+   기본 설정
+========================================================= */
+
+const STORAGE_KEY = "JUMIN_SCHOOL_MANAGER_FINAL_V3";
+
+const BASE_DATE = "2026-10-04";
+
+const CATEGORY_ORDER = [
+  "설교",
+  "예배 전 기도",
+  "헌금 기도",
+  "라면통 정리",
+  "유스예배 축도 후 정리",
+  "주일학교 청소 셀"
+];
+
+const DEFAULT_DATA = {
+  categories: {
+    "설교": [
+      "이영도",
+      "권준이",
+      "박수현",
+      "이현정",
+      "한예찬",
+      "정하연"
+    ],
+
+    "예배 전 기도": [
+      "한예찬",
+      "이영도",
+      "권준이",
+      "박수현",
+      "이지연",
+      "박주현",
+      "최해민",
+      "최지우",
+      "이현정"
+    ],
+
+    "헌금 기도": [
+      "이현정",
+      "유건",
+      "권준이",
+      "정하연",
+      "최해민",
+      "이지연",
+      "최지우",
+      "박은진",
+      "박수현",
+      "김주훈",
+      "박주현",
+      "조서준",
+      "한예찬",
+      "이영도",
+      "명준서",
+      "조민희",
+      "양하준"
+    ],
+
+    "라면통 정리": [
+      "권준이",
+      "박수현",
+      "박종진",
+      "신은철",
+      "신혜미",
+      "윤지영",
+      "이민석",
+      "이나라",
+      "이영도",
+      "이지연",
+      "이현정",
+      "정서연",
+      "정하연",
+      "조민희",
+      "최지우",
+      "최해민",
+      "한예찬",
+      "권나영"
+    ],
+
+    "유스예배 축도 후 정리": [
+      "권준이",
+      "박수현",
+      "이영도",
+      "박주현",
+      "이지연",
+      "이현정",
+      "최해민",
+      "최지우"
+    ],
+
+    "주일학교 청소 셀": [
+      "수현셀",
+      "예찬셀+영도셀",
+      "이현정셀+지우셀",
+      "민희셀"
+    ]
+  },
+
+  inactive: [],
+
+  skippedWeeks: []
+};
+
+
+/* =========================================================
+   데이터
+========================================================= */
+
+let data = loadData();
+
+function deepCopy(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function loadData() {
+
+  try {
+
+    const saved = localStorage.getItem(STORAGE_KEY);
+
+    if (!saved) {
+      return deepCopy(DEFAULT_DATA);
+    }
+
+    const parsed = JSON.parse(saved);
+
+    return {
+      categories: {
+        ...deepCopy(DEFAULT_DATA.categories),
+        ...(parsed.categories || {})
+      },
+
+      inactive: Array.isArray(parsed.inactive)
+        ? parsed.inactive
+        : [],
+
+      skippedWeeks: Array.isArray(parsed.skippedWeeks)
+        ? parsed.skippedWeeks
+        : []
+    };
+
+  } catch (error) {
+
+    console.error(error);
+
+    return deepCopy(DEFAULT_DATA);
+  }
+}
+
+function saveData() {
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(data)
+  );
+}
+
+
+/* =========================================================
+   날짜
+========================================================= */
+
+function parseDate(value) {
+
+  const [y, m, d] = value.split("-").map(Number);
+
+  return new Date(
+    y,
+    m - 1,
+    d
+  );
+}
+
+function formatDate(date) {
+
+  const y = date.getFullYear();
+
+  const m = String(
+    date.getMonth() + 1
+  ).padStart(2, "0");
+
+  const d = String(
+    date.getDate()
+  ).padStart(2, "0");
+
+  return `${y}-${m}-${d}`;
+}
+
+function formatShortDate(date) {
+
+  const m = String(
+    date.getMonth() + 1
+  ).padStart(2, "0");
+
+  const d = String(
+    date.getDate()
+  ).padStart(2, "0");
+
+  return `${m}/${d}`;
+}
+
+function addDays(date, days) {
+
+  const result = new Date(date);
+
+  result.setDate(
+    result.getDate() + days
+  );
+
+  return result;
+}
+
+function getFirstUpcomingSunday() {
+
+  const today = new Date();
+
+  today.setHours(0, 0, 0, 0);
+
+  const base = parseDate(BASE_DATE);
+
+  base.setHours(0, 0, 0, 0);
+
+  let date = new Date(today);
+
+  if (date < base) {
+    date = new Date(base);
+  }
+
+  const day = date.getDay();
+
+  const daysUntilSunday =
+    day === 0
+      ? 0
+      : 7 - day;
+
+  return addDays(
+    date,
+    daysUntilSunday
+  );
+}
+
+function isSunday(date) {
+  return date.getDay() === 0;
+}
+
+
+/* =========================================================
+   담당연기
+========================================================= */
+
+function isSkipped(date) {
+
+  const key = formatDate(date);
+
+  return data.skippedWeeks.includes(key);
+}
+
+function countNormalWeeksBefore(targetDate) {
+
+  const base = parseDate(BASE_DATE);
+
+  let count = 0;
+
+  let current = new Date(base);
+
+  while (current < targetDate) {
+
+    if (!isSkipped(current)) {
+      count++;
+    }
+
+    current = addDays(current, 7);
+  }
+
+  return count;
+}
+
+
+/* =========================================================
+   담당자 계산
+========================================================= */
+
+function getPerson(category, date) {
+
+  const people =
+    data.categories[category] || [];
+
+  if (people.length === 0) {
+    return "담당자 없음";
+  }
+
+  const normalWeekIndex =
+    countNormalWeeksBefore(date);
+
+  const index =
+    normalWeekIndex % people.length;
+
+  return people[index];
+}
+
+
+/* =========================================================
+   담당 일정
+========================================================= */
+
+function renderSchedule() {
+
+  const container =
+    document.getElementById(
+      "scheduleContainer"
+    );
+
+  container.innerHTML = "";
+
+  const firstSunday =
+    getFirstUpcomingSunday();
+
+  for (let week = 0; week < 4; week++) {
+
+    const date =
+      addDays(
+        firstSunday,
+        week * 7
+      );
+
+    const card =
+      document.createElement("div");
+
+    card.className = "week-card";
+
+    const title =
+      document.createElement("div");
+
+    title.className = "week-title";
+
+    title.textContent =
+      `<${formatShortDate(date)}>`;
+
+    card.appendChild(title);
+
+    if (isSkipped(date)) {
+
+      const skipped =
+        document.createElement("div");
+
+      skipped.className =
+        "week-skipped";
+
+      skipped.textContent =
+        "담당연기 · 순번 건너뜀";
+
+      card.appendChild(skipped);
+
+    } else {
+
+      CATEGORY_ORDER.forEach(
+        category => {
+
+          const row =
+            document.createElement(
+              "div"
+            );
+
+          row.className =
+            "assignment-row";
+
+          const name =
+            document.createElement(
+              "div"
+            );
+
+          name.className =
+            "assignment-name";
+
+          name.textContent =
+            category;
+
+          const person =
+            document.createElement(
+              "div"
+            );
+
+          person.className =
+            "assignment-person";
+
+          person.textContent =
+            getPerson(
+              category,
+              date
+            );
+
+          row.appendChild(name);
+          row.appendChild(person);
+
+          card.appendChild(row);
+        }
+      );
+    }
+
+    container.appendChild(card);
+  }
+}
+
+
+/* =========================================================
+   4주 복사
+========================================================= */
+
+function makeFourWeekText() {
+
+  const firstSunday =
+    getFirstUpcomingSunday();
+
+  const blocks = [];
+
+  for (let week = 0; week < 4; week++) {
+
+    const date =
+      addDays(
+        firstSunday,
+        week * 7
+      );
+
+    const lines = [];
+
+    lines.push(
+      `<${formatShortDate(date)}>`
+    );
+
+    if (isSkipped(date)) {
+
+      lines.push(
+        "담당연기"
+      );
+
+    } else {
+
+      CATEGORY_ORDER.forEach(
+        category => {
+
+          lines.push(
+            `${category}: ${getPerson(category, date)}`
+          );
+
+        }
+      );
+    }
+
+    blocks.push(
+      lines.join("\n")
+    );
+  }
+
+  return blocks.join("\n\n");
+}
+
+async function copyFourWeeks() {
+
+  const text =
+    makeFourWeekText();
+
+  try {
+
+    await navigator.clipboard.writeText(
+      text
+    );
+
+    alert(
+      "4주 일정 전체가 복사되었습니다."
+    );
+
+  } catch (error) {
+
+    const textarea =
+      document.createElement("textarea");
+
+    textarea.value = text;
+
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+
+    document.body.appendChild(
+      textarea
+    );
+
+    textarea.select();
+
+    document.execCommand("copy");
+
+    textarea.remove();
+
+    alert(
+      "4주 일정 전체가 복사되었습니다."
+    );
+  }
+}
+
+
+/* =========================================================
+   관리 탭
+========================================================= */
+
+function renderManager() {
+
+  const container =
+    document.getElementById(
+      "managerContainer"
+    );
+
+  container.innerHTML = "";
+
+  CATEGORY_ORDER.forEach(
+    category => {
+
+      const section =
+        document.createElement("div");
+
+      section.className =
+        "category";
+
+      const header =
+        document.createElement("div");
+
+      header.className =
+        "category-header";
+
+      header.textContent =
+        category;
+
+      section.appendChild(header);
+
+      const list =
+        document.createElement("div");
+
+      list.className =
+        "person-list";
+
+      const people =
+        data.categories[category] || [];
+
+      people.forEach(
+        (person, index) => {
+
+          const item =
+            document.createElement("div");
+
+          item.className =
+            "person-item";
+
+          item.dataset.category =
+            category;
+
+          item.dataset.index =
+            String(index);
+
+          const handle =
+            document.createElement("button");
+
+          handle.className =
+            "drag-handle";
+
+          handle.type = "button";
+
+          handle.textContent =
+            "☷";
+
+          handle.title =
+            "순서 이동";
+
+          handle.dataset.category =
+            category;
+
+          handle.dataset.index =
+            String(index);
+
+          const number =
+            document.createElement("div");
+
+          number.className =
+            "person-number";
+
+          number.textContent =
+            index + 1;
+
+          const name =
+            document.createElement("div");
+
+          name.className =
+            "person-name";
+
+          name.textContent =
+            person;
+
+          const deactivate =
+            document.createElement("button");
+
+          deactivate.className =
+            "person-action";
+
+          deactivate.type =
+            "button";
+
+          deactivate.textContent =
+            "비활성";
+
+          deactivate.addEventListener(
+            "click",
+            () => {
+              deactivatePerson(
+                category,
+                person
+              );
+            }
+          );
+
+          item.appendChild(handle);
+          item.appendChild(number);
+          item.appendChild(name);
+          item.appendChild(deactivate);
+
+          list.appendChild(item);
+        }
+      );
+
+      if (people.length === 0) {
+
+        const empty =
+          document.createElement("div");
+
+        empty.className =
+          "empty";
+
+        empty.textContent =
+          "등록된 담당자가 없습니다.";
+
+        list.appendChild(empty);
+      }
+
+      section.appendChild(list);
+
+      const addArea =
+        document.createElement("div");
+
+      addArea.className =
+        "add-area";
+
+      const input =
+        document.createElement("input");
+
+      input.type = "text";
+
+      input.placeholder =
+        "담당자 이름";
+
+      input.id =
+        `add-${category}`;
+
+      const addButton =
+        document.createElement("button");
+
+      addButton.type =
+        "button";
+
+      addButton.textContent =
+        "추가";
+
+      addButton.addEventListener(
+        "click",
+        () => {
+
+          addPerson(
+            category,
+            input.value
+          );
+
+        }
+      );
+
+      input.addEventListener(
+        "keydown",
+        event => {
+
+          if (event.key === "Enter") {
+
+            addPerson(
+              category,
+              input.value
+            );
+
+          }
+        }
+      );
+
+      addArea.appendChild(input);
+      addArea.appendChild(addButton);
+
+      section.appendChild(addArea);
+
+      container.appendChild(section);
+    }
+  );
+
+  setupDragAndDrop();
+
+  renderInactive();
+}
+
+
+/* =========================================================
+   담당자 추가
+========================================================= */
+
+function addPerson(
+  category,
+  name
+) {
+
+  const trimmed =
+    name.trim();
+
+  if (!trimmed) {
+    alert("담당자 이름을 입력해주세요.");
+    return;
+  }
+
+  if (
+    data.categories[category]
+      .includes(trimmed)
+  ) {
+    alert("이미 등록된 담당자입니다.");
+    return;
+  }
+
+  if (
+    data.inactive.includes(trimmed)
+  ) {
+    alert(
+      "비활성 담당자에 같은 이름이 있습니다. 먼저 복구해주세요."
+    );
+    return;
+  }
+
+  data.categories[category].push(
+    trimmed
+  );
+
+  saveData();
+
+  renderManager();
+  renderSchedule();
+}
+
+
+/* =========================================================
+   비활성화
+========================================================= */
+
+function deactivatePerson(
+  category,
+  person
+) {
+
+  if (
+    !confirm(
+      `${person} 담당자를 비활성화하시겠습니까?`
+    )
+  ) {
+    return;
+  }
+
+  data.categories[category] =
+    data.categories[category].filter(
+      name => name !== person
+    );
+
+  if (
+    !data.inactive.includes(person)
+  ) {
+    data.inactive.push(person);
+  }
+
+  saveData();
+
+  renderManager();
+  renderSchedule();
+}
+
+
+/* =========================================================
+   비활성 담당자 관리
+========================================================= */
+
+function renderInactive() {
+
+  const container =
+    document.getElementById(
+      "inactiveContainer"
+    );
+
+  container.innerHTML = "";
+
+  if (
+    data.inactive.length === 0
+  ) {
+
+    const empty =
+      document.createElement("div");
+
+    empty.className =
+      "empty";
+
+    empty.textContent =
+      "비활성 담당자가 없습니다.";
+
+    container.appendChild(empty);
+
+    return;
+  }
+
+  data.inactive.forEach(
+    person => {
+
+      const row =
+        document.createElement("div");
+
+      row.className =
+        "inactive-item";
+
+      const name =
+        document.createElement("div");
+
+      name.className =
+        "inactive-name";
+
+      name.textContent =
+        person;
+
+      const restore =
+        document.createElement("button");
+
+      restore.className =
+        "small-button";
+
+      restore.type =
+        "button";
+
+      restore.textContent =
+        "복구";
+
+      restore.addEventListener(
+        "click",
+        () => {
+          restorePerson(person);
+        }
+      );
+
+      const remove =
+        document.createElement("button");
+
+      remove.className =
+        "small-button delete-button";
+
+      remove.type =
+        "button";
+
+      remove.textContent =
+        "완전 삭제";
+
+      remove.addEventListener(
+        "click",
+        () => {
+          permanentlyDeletePerson(
+            person
+          );
+        }
+      );
+
+      row.appendChild(name);
+      row.appendChild(restore);
+      row.appendChild(remove);
+
+      container.appendChild(row);
+    }
+  );
+}
+
+
+/* =========================================================
+   복구
+========================================================= */
+
+function restorePerson(person) {
+
+  if (
+    !confirm(
+      `${person} 담당자를 다시 활성화하시겠습니까?`
+    )
+  ) {
+    return;
+  }
+
+  data.inactive =
+    data.inactive.filter(
+      name => name !== person
+    );
+
+  /*
+    복구할 때에는 각 항목의 마지막 순서에
+    다시 추가합니다.
+  */
+  CATEGORY_ORDER.forEach(
+    category => {
+
+      if (
+        data.categories[category]
+          .includes(person)
+      ) {
+        return;
+      }
+
+    }
+  );
+
+  /*
+    비활성화는 담당자 단위로 이루어지므로
+    복구 시 모든 항목에서 다시 사용할 수 있도록
+    마지막 순서에 추가합니다.
+  */
+  CATEGORY_ORDER.forEach(
+    category => {
+
+      if (
+        !data.categories[category]
+          .includes(person)
+      ) {
+
+        data.categories[category]
+          .push(person);
+      }
+
+    }
+  );
+
+  saveData();
+
+  renderManager();
+  renderSchedule();
+}
+
+
+/* =========================================================
+   완전 삭제
+========================================================= */
+
+function permanentlyDeletePerson(
+  person
+) {
+
+  if (
+    !confirm(
+      `${person} 담당자를 완전히 삭제하시겠습니까?\n\n삭제하면 다시 복구할 수 없습니다.`
+    )
+  ) {
+    return;
+  }
+
+  /*
+    활성 담당자 목록에서도 삭제
+  */
+  CATEGORY_ORDER.forEach(
+    category => {
+
+      data.categories[category] =
+        data.categories[category]
+          .filter(
+            name => name !== person
+          );
+
+    }
+  );
+
+  /*
+    비활성 담당자 목록에서도 삭제
+  */
+  data.inactive =
+    data.inactive.filter(
+      name => name !== person
+    );
+
+  saveData();
+
+  renderManager();
+  renderSchedule();
+}
+
+
+/* =========================================================
+   담당자 순서 이동
+========================================================= */
+
+let dragging = null;
+
+function setupDragAndDrop() {
+
+  const handles =
+    document.querySelectorAll(
+      ".drag-handle"
+    );
+
+  handles.forEach(
+    handle => {
+
+      handle.addEventListener(
+        "pointerdown",
+        startDrag
+      );
+    }
+  );
+}
+
+function startDrag(event) {
+
+  event.preventDefault();
+
+  const handle =
+    event.currentTarget;
+
+  const item =
+    handle.closest(".person-item");
+
+  if (!item) {
+    return;
+  }
+
+  const category =
+    item.dataset.category;
+
+  const startIndex =
+    Number(item.dataset.index);
+
+  dragging = {
+    category,
+    item,
+    startIndex,
+    currentIndex: startIndex
+  };
+
+  item.classList.add(
+    "dragging"
+  );
+
+  handle.setPointerCapture(
+    event.pointerId
+  );
+
+  document.addEventListener(
+    "pointermove",
+    moveDrag
+  );
+
+  document.addEventListener(
+    "pointerup",
+    endDrag,
+    { once: true }
+  );
+}
+
+function moveDrag(event) {
+
+  if (!dragging) {
+    return;
+  }
+
+  const element =
+    document.elementFromPoint(
+      event.clientX,
+      event.clientY
+    );
+
+  const target =
+    element
+      ? element.closest(".person-item")
+      : null;
+
+  if (
+    !target ||
+    target === dragging.item ||
+    target.dataset.category !== dragging.category
+  ) {
+    return;
+  }
+
+  document
+    .querySelectorAll(".person-item")
+    .forEach(
+      item => {
+        item.classList.remove(
+          "drag-over"
+        );
+      }
+    );
+
+  target.classList.add(
+    "drag-over"
+  );
+
+  const list =
+    target.parentElement;
+
+  const targetIndex =
+    Number(target.dataset.index);
+
+  const targetRect =
+    target.getBoundingClientRect();
+
+  const targetMiddle =
+    targetRect.top +
+    targetRect.height / 2;
+
+  if (
+    event.clientY < targetMiddle
+  ) {
+
+    list.insertBefore(
+      dragging.item,
+      target
+    );
+
+  } else {
+
+    list.insertBefore(
+      dragging.item,
+      target.nextSibling
+    );
+  }
+}
+
+function endDrag() {
+
+  if (!dragging) {
+    return;
+  }
+
+  const category =
+    dragging.category;
+
+  const list =
+    document.querySelector(
+      `.person-list`
+    );
+
+  const currentItems =
+    Array.from(
+      document.querySelectorAll(
+        `.category`
+      )
+    );
+
+  /*
+    현재 DOM 순서를 category별로
+    다시 읽어서 데이터에 반영합니다.
+  */
+  let targetList = null;
+
+  currentItems.forEach(
+    section => {
+
+      const header =
+        section.querySelector(
+          ".category-header"
+        );
+
+      if (
+        header &&
+        header.textContent === category
+      ) {
+        targetList =
+          section.querySelector(
+            ".person-list"
+          );
+      }
+    }
+  );
+
+  if (targetList) {
+
+    const newOrder =
+      Array.from(
+        targetList.querySelectorAll(
+          ".person-item"
+        )
+      ).map(
+        item => {
+
+          const name =
+            item.querySelector(
+              ".person-name"
+            );
+
+          return name.textContent;
+        }
+      );
+
+    data.categories[category] =
+      newOrder;
+  }
+
+  document
+    .querySelectorAll(".person-item")
+    .forEach(
+      item => {
+
+        item.classList.remove(
+          "dragging"
+        );
+
+        item.classList.remove(
+          "drag-over"
+        );
+      }
+    );
+
+  dragging = null;
+
+  saveData();
+
+  /*
+    번호를 다시 표시하고
+    일정도 즉시 갱신합니다.
+  */
+  renderManager();
+  renderSchedule();
+}
+
+
+/* =========================================================
+   담당연기 추가
+========================================================= */
+
+function addSkippedDate(value) {
+
+  if (!value) {
+
+    alert(
+      "담당연기 날짜를 선택해주세요."
+    );
+
+    return;
+  }
+
+  const date =
+    parseDate(value);
+
+  const base =
+    parseDate(BASE_DATE);
+
+  if (
+    !isSunday(date)
+  ) {
+
+    alert(
+      "일요일만 선택할 수 있습니다."
+    );
+
+    return;
+  }
+
+  if (date < base) {
+
+    alert(
+      "2026년 10월 4일 이후 날짜만 선택할 수 있습니다."
+    );
+
+    return;
+  }
+
+  if (
+    data.skippedWeeks.includes(value)
+  ) {
+
+    alert(
+      "이미 담당연기된 날짜입니다."
+    );
+
+    return;
+  }
+
+  if (
+    !confirm(
+      `${formatShortDate(date)} 담당을 연기하시겠습니까?`
+    )
+  ) {
+    return;
+  }
+
+  data.skippedWeeks.push(value);
+
+  data.skippedWeeks.sort();
+
+  saveData();
+
+  renderSkippedHistory();
+  renderSchedule();
+
+  document.getElementById(
+    "skipDate"
+  ).value = "";
+}
+
+
+/* =========================================================
+   담당연기 기록
+========================================================= */
+
+function renderSkippedHistory() {
+
+  const container =
+    document.getElementById(
+      "skippedHistory"
+    );
+
+  container.innerHTML = "";
+
+  const title =
+    document.createElement("div");
+
+  title.className =
+    "skipped-history-title";
+
+  title.textContent =
+    "담당연기 날짜";
+
+  container.appendChild(title);
+
+  if (
+    data.skippedWeeks.length === 0
+  ) {
+
+    const empty =
+      document.createElement("div");
+
+    empty.className =
+      "empty";
+
+    empty.textContent =
+      "담당연기된 날짜가 없습니다.";
+
+    container.appendChild(empty);
+
+    return;
+  }
+
+  [...data.skippedWeeks]
+    .sort()
+    .forEach(
+      key => {
+
+        const row =
+          document.createElement("div");
+
+        row.className =
+          "skipped-row";
+
+        const date =
+          parseDate(key);
+
+        const dateText =
+          document.createElement("div");
+
+        dateText.className =
+          "skipped-date";
+
+        dateText.textContent =
+          formatShortDate(date);
+
+        const cancel =
+          document.createElement("button");
+
+        cancel.className =
+          "cancel-skip";
+
+        cancel.type =
+          "button";
+
+        cancel.textContent =
+          "취소";
+
+        cancel.addEventListener(
+          "click",
+          () => {
+            cancelSkippedDate(key);
+          }
+        );
+
+        row.appendChild(
+          dateText
+        );
+
+        row.appendChild(
+          cancel
+        );
+
+        container.appendChild(
+          row
+        );
+      }
+    );
+}
+
+
+/* =========================================================
+   담당연기 취소
+========================================================= */
+
+function cancelSkippedDate(key) {
+
+  const date =
+    parseDate(key);
+
+  if (
+    !confirm(
+      `${formatShortDate(date)} 담당연기를 취소하시겠습니까?`
+    )
+  ) {
+    return;
+  }
+
+  data.skippedWeeks =
+    data.skippedWeeks.filter(
+      value => value !== key
+    );
+
+  saveData();
+
+  renderSkippedHistory();
+  renderSchedule();
+}
+
+
+/* =========================================================
+   초기화
+========================================================= */
+
+function resetData() {
+
+  if (
+    !confirm(
+      "담당자 순서와 비활성 담당자, 담당연기 설정을 모두 초기화하시겠습니까?"
+    )
+  ) {
+    return;
+  }
+
+  data =
+    deepCopy(DEFAULT_DATA);
+
+  saveData();
+
+  renderManager();
+  renderSchedule();
+  renderSkippedHistory();
+}
+
+
+/* =========================================================
+   탭
+========================================================= */
+
+function showSchedule() {
+
+  document
+    .getElementById("schedulePage")
+    .classList.remove("hidden");
+
+  document
+    .getElementById("managerPage")
+    .classList.add("hidden");
+
+  document
+    .getElementById("scheduleTab")
+    .classList.add("active");
+
+  document
+    .getElementById("managerTab")
+    .classList.remove("active");
+
+  renderSchedule();
+}
+
+function showManager() {
+
+  document
+    .getElementById("schedulePage")
+    .classList.add("hidden");
+
+  document
+    .getElementById("managerPage")
+    .classList.remove("hidden");
+
+  document
+    .getElementById("scheduleTab")
+    .classList.remove("active");
+
+  document
+    .getElementById("managerTab")
+    .classList.add("active");
+
+  renderManager();
+  renderSkippedHistory();
+}
+
+
+/* =========================================================
+   버튼
+========================================================= */
+
+document
+  .getElementById("scheduleTab")
+  .addEventListener(
+    "click",
+    showSchedule
+  );
+
+document
+  .getElementById("managerTab")
+  .addEventListener(
+    "click",
+    showManager
+  );
+
+document
+  .getElementById("copyFourWeeks")
+  .addEventListener(
+    "click",
+    copyFourWeeks
+  );
+
+document
+  .getElementById("addSkipButton")
+  .addEventListener(
+    "click",
+    () => {
+
+      const value =
+        document.getElementById(
+          "skipDate"
+        ).value;
+
+      addSkippedDate(value);
+    }
+  );
+
+document
+  .getElementById("resetButton")
+  .addEventListener(
+    "click",
+    resetData
+  );
+
+
+/* =========================================================
+   최초 실행
+========================================================= */
+
+renderSchedule();
+renderSkippedHistory();
+
+</script>
+
+</body>
+</html>
